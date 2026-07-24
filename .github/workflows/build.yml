@@ -1,0 +1,23 @@
+name: Build Verus Miner APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+  
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Clone Repository Source
+      uses: actions/checkout@v4
+
+    - name: Set up Android SDK and NDK
+      uses: android-actions/setup-android@v3
+
+    - name: Compile and Build Miner
+      run: |
+        echo "Preparando entorno de compilación ARM para Android..."
+        git clone https://github.com/monkins1010/ccminer.git
+        cd ccminer
+        echo "Codigo clonado correctamente. Listo para compilar."
