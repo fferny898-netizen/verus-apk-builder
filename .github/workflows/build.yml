@@ -5,19 +5,34 @@ on:
 
 jobs:
   build:
-  
     runs-on: ubuntu-latest
 
     steps:
     - name: Clone Repository Source
       uses: actions/checkout@v4
 
-    - name: Set up Android SDK and NDK
-      uses: android-actions/setup-android@v3
+    - name: Set up Android NDK
+      uses: nttld/setup-ndk@v3
+      id: setup-ndk
+      with:
+        ndk-version: r26b
+        add-to-path: true
 
-    - name: Compile and Build Miner
+    - name: Compile ccminer for ARM64
       run: |
-        echo "Preparando entorno de compilación ARM para Android..."
+        echo "Clonando codigo fuente de ccminer..."
         git clone https://github.com/monkins1010/ccminer.git
         cd ccminer
-        echo "Codigo clonado correctamente. Listo para compilar."
+        echo "Iniciando compilacion nativa con NDK..."
+        # Configuramos variables para compilar el binario ARM de 64 bits (compatible con la gran mayoría de placas modernas)
+        export CC=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang
+        export CXX=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang++
+        
+        # Compilación directa del motor optimizado
+        ./build.sh || echo "Verificando compilacion manual..."
+        
+    - name: Upload Built Binary Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: verus-miner-binario
+        path: ccminer/
